@@ -9,8 +9,11 @@ use piston::event_loop::{EventSettings, Events};
 use piston::input::{RenderArgs, RenderEvent, UpdateArgs, UpdateEvent};
 use piston::window::WindowSettings;
 
+use glam;
+
 pub struct App {
     gl: GlGraphics, // OpenGL drawing backend.
+    fish: Fish,
 }
 
 impl App {
@@ -29,6 +32,11 @@ impl App {
     }
 }
 
+struct Fish {
+    pos: glam::Vec2,
+}
+
+
 fn main() {
     // Change this to OpenGL::V2_1 if not working.
     let opengl = OpenGL::V3_2;
@@ -42,8 +50,8 @@ fn main() {
 
     // Create a new game and run it.
     let mut app = App {
-        gl: GlGraphics::new(opengl),
-        
+        gl: GlGraphics::new(opengl),    
+
     };
 
     let mut events = Events::new(EventSettings::new());
