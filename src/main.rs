@@ -26,9 +26,10 @@ impl App {
             // Clear the screen.
             clear(BLUE, gl);
         });
+        self.fish.render(&mut self.gl, args);
     }
 
-    fn update(&mut self, args: &UpdateArgs) {
+    fn update(&mut self, _args: &UpdateArgs) {
     }
 }
 
@@ -36,6 +37,19 @@ struct Fish {
     pos: glam::Vec2,
 }
 
+impl Fish {
+    fn render(&self, gl: &mut GlGraphics, _args: &RenderArgs) {
+
+        const RED: [f32; 4] = [1.0, 0.0, 0.0, 1.0];
+
+        let square = graphics::rectangle::square(self.pos.x as f64, self.pos.y as f64, 20_f64);
+        gl.draw(_args.viewport(), |c, gl| {
+            let transform = c.transform;
+
+            graphics::rectangle(RED, square, transform, gl);
+        });
+    }
+}
 
 fn main() {
     // Change this to OpenGL::V2_1 if not working.
@@ -51,7 +65,7 @@ fn main() {
     // Create a new game and run it.
     let mut app = App {
         gl: GlGraphics::new(opengl),    
-
+        fish : Fish {pos: glam::Vec2::new(10.0, 10.0)},
     };
 
     let mut events = Events::new(EventSettings::new());
