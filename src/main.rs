@@ -2,6 +2,7 @@ extern crate glutin_window;
 extern crate graphics;
 extern crate opengl_graphics;
 extern crate piston;
+extern crate piston_window;
 
 use glutin_window::GlutinWindow as Window;
 use opengl_graphics::{GlGraphics, OpenGL};
@@ -10,6 +11,10 @@ use piston::input::{RenderArgs, RenderEvent, UpdateArgs, UpdateEvent};
 use piston::window::WindowSettings;
 
 use glam;
+
+enum Direction {
+    Right, Left, Up, Down
+}
 
 pub struct App {
     gl: GlGraphics, // OpenGL drawing backend.
@@ -30,11 +35,13 @@ impl App {
     }
 
     fn update(&mut self, _args: &UpdateArgs) {
+        self.fish.update();
     }
 }
 
 struct Fish {
     pos: glam::Vec2,
+    dir: Direction,
 }
 
 impl Fish {
@@ -42,12 +49,23 @@ impl Fish {
 
         const RED: [f32; 4] = [1.0, 0.0, 0.0, 1.0];
 
-        let square = graphics::rectangle::square(self.pos.x as f64, self.pos.y as f64, 20_f64);
+        let square = graphics::rectangle::square((self.pos.x * 20.0) as f64,
+                                                 (self.pos.y * 20.0) as f64,
+                                                 20_f64);
         gl.draw(_args.viewport(), |c, gl| {
             let transform = c.transform;
 
             graphics::rectangle(RED, square, transform, gl);
         });
+    }
+    fn update(&mut self) {
+        match self.dir {
+            Direction::Up => self.pos.x -= 1.0,
+            Direction::Down => self.pos.y += 1.0,
+            Direction::Right => self.pos.x += 1.0,
+            Direction::Left => self.pos.x -= 1.0,
+
+        }
     }
 }
 
@@ -56,8 +74,8 @@ fn main() {
     let opengl = OpenGL::V3_2;
 
     // Create an Glutin window.
-    let mut window: Window = WindowSettings::new("Team seas", [200, 200])
-        .graphics_api(opengl)
+    let mut window: Window = WindowSettings::new("Snake Game", [620, 470])
+        .opengl(opengl)
         .exit_on_esc(true)
         .build()
         .unwrap();
@@ -65,7 +83,7 @@ fn main() {
     // Create a new game and run it.
     let mut app = App {
         gl: GlGraphics::new(opengl),    
-        fish : Fish {pos: glam::Vec2::new(10.0, 10.0)},
+        fish : Fish {pos: glam::Vec2::new(9.0, 9.0), dir: Direction::Right},
     };
 
     let mut events = Events::new(EventSettings::new());
@@ -74,9 +92,8 @@ fn main() {
             app.render(&args);
         }
 
-        if let Some(args) = e.update_args() {
-            app.update(&args);
+        if let Some(u) = e.update_args() {
+            app.update(&u);
         }
     }
 }
-
